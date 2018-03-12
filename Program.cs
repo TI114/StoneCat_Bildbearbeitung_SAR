@@ -12,8 +12,6 @@ public class Form1 : Form
     private PictureBox pictureBox1;
 
     public          Form1           ()  {  InitializeComponent();  }
-	
-    #region Vom Windows Form-Designer generierter Code
 
     private void InitializeComponent()
     {
@@ -45,12 +43,14 @@ public class Form1 : Form
             
             for (int x = 0; x < Bild.Width; x++) {
             	for (int y = 0; y < Bild.Height; y++) {
-            		//Graustufen erfassen -> Wenn vorhanden + 1
-            		hist[Bild.GetPixel(x,y).B] = hist[Bild.GetPixel(x,y).B] + 1;
+            		int tmp_gray_value = (Bild.GetPixel(x,y).B+Bild.GetPixel(x,y).G+Bild.GetPixel(x,y).R)/3;
+            		//Recording grayscale values -> + 1
+            		hist[tmp_gray_value] = hist[tmp_gray_value] + 1;
             		
-            		if ((Bild.GetPixel(x,y).ToArgb() * 100 / -16777216) >=3) {
-            			//Färbe Rot ein, wenn nicht weiß
-            			Bild.SetPixel(x,y, Color.FromArgb(Bild.GetPixel(x,y).R, 40, 40));
+            		//if ((Bild.GetPixel(x,y).ToArgb() * 100 / -16777216) >=3) { -> More CPU Time
+            		if (tmp_gray_value <= 245) {
+            			//Color to Red, if not white
+            			Bild.SetPixel(x,y, Color.FromArgb(tmp_gray_value, 40, 40));
             			if (x < minX)
             				minX = x;
             			if (x > maxX)
@@ -63,7 +63,7 @@ public class Form1 : Form
             	}
             }
             
-            /* Male Kasten um Fleck */
+            /* Draw a box around the coffee */
             for (int x = minX; x < maxX; x++) {
             	for (int y = (minY-1); y < minY; y++) {
             		Bild.SetPixel(x,y, Color.FromArgb(40, 40, 40));
@@ -88,11 +88,12 @@ public class Form1 : Form
             	}
             }
             
+            /* Round values of grayscale quantities for drawing */
             for (int i =0; i < 256; i++) {
             	hist[i] = (int) Math.Round((double) (hist[i] * 100 / 65536), MidpointRounding.AwayFromZero);
             }
                         
-            /* Male Graustufen-Mengen ins Bild */
+            /* Paint grayscale quantities into the image */
             for (int x = 0; x < 256; x++) {
             	for (int y = Bild.Height; y > (Bild.Height-hist[x]); y--) {
             		Bild.SetPixel((x-1),(y-1), Color.FromArgb(40, 40, 40));
@@ -117,8 +118,6 @@ public class Form1 : Form
             this.ResumeLayout(false);
 
     }
-
-    #endregion		
 
     private void Form1_Load(object sender, EventArgs e)
     {
