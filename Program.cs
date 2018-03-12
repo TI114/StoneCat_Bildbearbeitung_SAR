@@ -80,11 +80,10 @@ public class Form1 : Form
                         
             /* Paint grayscale quantities into the image */
             for (int x = 0; x < 256; x++) {
-            	for (int y = picture.Height; y > (picture.Height-hist[x]); y--) {
-            		picture.SetPixel((x-1),(y-1), Color.FromArgb(40, 40, 40));
+            	for (int y = (picture.Height-1); y > (picture.Height-hist[x]); y--) {
+            		picture.SetPixel(x,y, Color.FromArgb(40, 40, 40));
             	}
-            }
-           
+            }          
 
             this.pictureArea.Size = new System.Drawing.Size(picture.Size.Width,picture.Size.Height);
             this.pictureArea.Image = picture;
