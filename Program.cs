@@ -25,14 +25,18 @@ public class Form1 : Form
             
             int minX = picture.Width, maxX = 0, minY = picture.Height, maxY = 0;
             int[] hist = new int[256]; //Default 0
+            double darkestXValue = 255, darkestYValue = 255;
+            double darkestXPosition = 0, darkestYPosition = 0;
             
             for (int x = 0; x < picture.Width; x++) {
+            	double tmp_y_color_value = 0;
             	for (int y = 0; y < picture.Height; y++) {
-            		int tmp_gray_value = (picture.GetPixel(x,y).B+picture.GetPixel(x,y).G+picture.GetPixel(x,y).R)/3;
+            		Color tmp_color_value = picture.GetPixel(x,y);
+            		int tmp_gray_value = (tmp_color_value.B + tmp_color_value.G + tmp_color_value.R)/3;
             		//Recording grayscale values -> + 1
             		hist[tmp_gray_value] = hist[tmp_gray_value] + 1;
+            		tmp_y_color_value = tmp_y_color_value + tmp_gray_value;
             		
-            		//if ((Bild.GetPixel(x,y).ToArgb() * 100 / -16777216) >=3) { -> More CPU Time
             		if (tmp_gray_value <= 245) {
             			//Color to Red, if not white
             			picture.SetPixel(x,y, Color.FromArgb(tmp_gray_value, 40, 40));
@@ -46,6 +50,12 @@ public class Form1 : Form
             				maxY = y;
             		}
             	}
+            	
+            	if ((tmp_y_color_value/256) < darkestXValue) {
+            		darkestXValue = (tmp_y_color_value/256);
+            		darkestXPosition = x;
+            	}
+            	//TODO: Get darkestYValue
             }
             
             /* Draw a box around the coffee */
@@ -72,14 +82,11 @@ public class Form1 : Form
             		picture.SetPixel(x,y, Color.FromArgb(40, 40, 40));
             	}
             }
-            
-            /* Round values of grayscale quantities for drawing */
-            for (int i =0; i < 256; i++) {
-            	hist[i] = (int) Math.Round((double) (hist[i] * 100 / 65536), MidpointRounding.AwayFromZero);
-            }
                         
             /* Paint grayscale quantities into the image */
             for (int x = 0; x < 256; x++) {
+            	/* Round values of grayscale quantities for drawing */
+            	hist[x] = (int) Math.Round((double) (hist[x] * 100 / 65536), MidpointRounding.AwayFromZero);
             	for (int y = (picture.Height-1); y > (picture.Height-hist[x]); y--) {
             		picture.SetPixel(x,y, Color.FromArgb(40, 40, 40));
             	}
