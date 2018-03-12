@@ -3,13 +3,13 @@ using System;
 using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms.VisualStyles;
 
 
 public class Form1 : Form
 {
     private Button button1, button2, button3;
     private PictureBox pictureBox1;
-    private System.DirectoryServices.DirectorySearcher directorySearcher1;
 
     public          Form1           ()  {  InitializeComponent();  }
 	
@@ -17,18 +17,11 @@ public class Form1 : Form
 
     private void InitializeComponent()
     {
-            this.directorySearcher1 = new System.DirectoryServices.DirectorySearcher();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SuspendLayout();
-            // 
-            // directorySearcher1
-            // 
-            this.directorySearcher1.ClientTimeout = System.TimeSpan.Parse("-00:00:01");
-            this.directorySearcher1.ServerPageTimeLimit = System.TimeSpan.Parse("-00:00:01");
-            this.directorySearcher1.ServerTimeLimit = System.TimeSpan.Parse("-00:00:01");
             // 
             // button1
             // 
@@ -48,10 +41,14 @@ public class Form1 : Form
             SR.Close();
             
             int minX = Bild.Width, maxX = 0, minY = Bild.Height, maxY = 0;
+            int[] hist = new int[256]; //Default 0
             
             for (int x = 0; x < Bild.Width; x++) {
             	for (int y = 0; y < Bild.Height; y++) {
-            		if ((Bild.GetPixel(x,y).ToArgb() * 100 / -16777216) >=2) {
+            		//Graustufen erfassen -> Wenn vorhanden + 1
+            		hist[Bild.GetPixel(x,y).B] = hist[Bild.GetPixel(x,y).B] + 1;
+            		
+            		if ((Bild.GetPixel(x,y).ToArgb() * 100 / -16777216) >=3) {
             			//Färbe Rot ein, wenn nicht weiß
             			Bild.SetPixel(x,y, Color.FromArgb(Bild.GetPixel(x,y).R, 40, 40));
             			if (x < minX)
@@ -66,7 +63,7 @@ public class Form1 : Form
             	}
             }
             
-            /* TODO: Male Kasten um Fleck */
+            /* Male Kasten um Fleck */
             for (int x = minX; x < maxX; x++) {
             	for (int y = (minY-1); y < minY; y++) {
             		Bild.SetPixel(x,y, Color.FromArgb(40, 40, 40));
@@ -88,6 +85,17 @@ public class Form1 : Form
             for (int x = maxX; x < (maxX+1); x++) {
             	for (int y = minY; y < maxY; y++) {
             		Bild.SetPixel(x,y, Color.FromArgb(40, 40, 40));
+            	}
+            }
+            
+            for (int i =0; i < 256; i++) {
+            	hist[i] = (int) Math.Round((double) (hist[i] * 100 / 65536), MidpointRounding.AwayFromZero);
+            }
+                        
+            /* Male Graustufen-Mengen ins Bild */
+            for (int x = 0; x < 256; x++) {
+            	for (int y = Bild.Height; y > (Bild.Height-hist[x]); y--) {
+            		Bild.SetPixel((x-1),(y-1), Color.FromArgb(40, 40, 40));
             	}
             }
            
